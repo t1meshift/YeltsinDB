@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <YeltsinDB/types.h>
+#include <YeltsinDB/table_page.h>
 
 /**
  * @file ydb.h
@@ -130,3 +131,21 @@ YDB_TablePage* ydb_get_current_page(YDB_Engine* instance);
 YDB_Error ydb_delete_current_page(YDB_Engine* instance);
 
 // TODO: rebuild page offsets, etc.
+
+/**
+ * @mainpage YeltsinDB docs index page
+ *
+ * Welcome to docs page!
+ *
+ * These links could help you:
+ *
+ * - ydb.h
+ *
+ * - table_page.h
+ *
+ * - error_code.h
+ *
+ * - types.h
+ *
+ * And in some cases even [table file structure](table_file.md)
+ */
