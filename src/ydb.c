@@ -135,15 +135,12 @@ YDB_Error ydb_load_table(YDB_Engine *instance, const char *path) {
   THROW_IF_NULL(instance, YDB_ERR_INSTANCE_NOT_INITIALIZED);
   THROW_IF_NULL(!instance->in_use, YDB_ERR_INSTANCE_IN_USE);
 
-  instance->in_use = -1; // unsigned value overflow to fill all the bits
-  instance->filename = strdup(path);
-
-  if (access(instance->filename, F_OK) == -1) {
+  if (access(path, F_OK) == -1) {
     // TODO: Windows does not check W_OK correctly, use other methods.
     // TODO: if can't read/write, throw other error
     return YDB_ERR_TABLE_NOT_EXIST;
   }
-  instance->fd = fopen(instance->filename, "rb+");
+  instance->fd = fopen(path, "rb+");
   THROW_IF_NULL(instance->fd, YDB_ERR_UNKNOWN); // TODO file open error
 
   char signature[4];
@@ -164,6 +161,9 @@ YDB_Error ydb_load_table(YDB_Engine *instance, const char *path) {
   fread(&(instance->last_page_offset), sizeof(YDB_Offset), 1, instance->fd);
   fread(&(instance->last_free_page_offset), sizeof(YDB_Offset), 1, instance->fd);
   // TODO check offsets
+
+  instance->in_use = -1; // unsigned value overflow to fill all the bits
+  instance->filename = strdup(path);
 
   instance->curr_page_offset = instance->first_page_offset;
   return __ydb_read_page(instance);
