@@ -46,7 +46,7 @@ void ydb_terminate_instance(YDB_Engine *instance) {
 }
 
 // Internal usage only!
-// Its only purpose to read page data and set next_page offset.
+// Its only purpose to read current page data and set next_page offset.
 // You should write prev_page offset on your own.
 inline YDB_Error __ydb_read_page(YDB_Engine *inst) {
   THROW_IF_NULL(inst, YDB_ERR_INSTANCE_NOT_INITIALIZED);
@@ -308,7 +308,7 @@ YDB_Error ydb_append_page(YDB_Engine* instance, YDB_TablePage* page) {
   return YDB_ERR_SUCCESS;
 }
 
-YDB_Error ydb_replace_page(YDB_Engine *instance, YDB_TablePage *page) {
+YDB_Error ydb_replace_current_page(YDB_Engine *instance, YDB_TablePage *page) {
   THROW_IF_NULL(instance, YDB_ERR_INSTANCE_NOT_INITIALIZED);
   THROW_IF_NULL(instance->in_use, YDB_ERR_INSTANCE_NOT_IN_USE);
   THROW_IF_NULL(page, YDB_ERR_PAGE_NOT_INITIALIZED);
@@ -341,6 +341,7 @@ YDB_Error ydb_replace_page(YDB_Engine *instance, YDB_TablePage *page) {
 }
 
 YDB_Error ydb_delete_current_page(YDB_Engine *instance) {
+  // TODO check if it's only page in table
   THROW_IF_NULL(instance, YDB_ERR_INSTANCE_NOT_INITIALIZED);
   THROW_IF_NULL(instance->in_use, YDB_ERR_INSTANCE_NOT_IN_USE);
 
@@ -350,7 +351,6 @@ YDB_Error ydb_delete_current_page(YDB_Engine *instance) {
 
   // Write last_free_page_offset as the next page for current one
   fwrite(&(instance->last_free_page_offset), sizeof(YDB_Offset), 1, instance->fd);
-
 
   // Link the previous page with next one (could be null ptr)
   fseek(instance->fd, instance->prev_page_offset + 1, SEEK_SET); // Skip flags
@@ -368,6 +368,12 @@ YDB_Error ydb_delete_current_page(YDB_Engine *instance) {
 
   // Flush buffer
   fflush(instance->fd);
+
+  // Set previous page
+  int64_t ind = --(instance->current_page_index);
+  if (ydb_seek_page(instance, ind + 1)) {
+    return YDB_ERR_UNKNOWN;
+  }
 
   return YDB_ERR_SUCCESS;
 }

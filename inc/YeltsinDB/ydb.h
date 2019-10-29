@@ -102,7 +102,7 @@ YDB_Error ydb_next_page(YDB_Engine* instance);
  *
  * @todo Possible error codes.
  */
-YDB_Error ydb_replace_page(YDB_Engine* instance, YDB_TablePage* page);
+YDB_Error ydb_replace_current_page(YDB_Engine* instance, YDB_TablePage* page);
 
 /**
  * @brief Appends a page to a table.
@@ -124,7 +124,7 @@ YDB_Error ydb_append_page(YDB_Engine* instance, YDB_TablePage* page);
 YDB_TablePage* ydb_get_current_page(YDB_Engine* instance);
 
 /**
- * Delete current page.
+ * Delete current page and seek to the previous one.
  * @param instance A YeltsinDB instance.
  * @return Operation status.
  */
