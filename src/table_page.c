@@ -73,7 +73,7 @@ YDB_Error ydb_page_data_read(YDB_TablePage *src, void *dst, YDB_PageSize n) {
   return YDB_ERR_SUCCESS;
 }
 
-YDB_Error ydb_page_data_write(YDB_TablePage *dst, void *src, YDB_PageSize n) {
+YDB_Error ydb_page_data_write(YDB_TablePage *dst, const void *src, YDB_PageSize n) {
   THROW_IF_NULL(src, YDB_ERR_WRITE_TO_NULLPTR);
   THROW_IF_NULL(dst, YDB_ERR_PAGE_NOT_INITIALIZED);
   THROW_IF_NULL(n, YDB_ERR_ZERO_SIZE_RW);

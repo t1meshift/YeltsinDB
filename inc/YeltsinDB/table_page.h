@@ -68,7 +68,7 @@ YDB_Error ydb_page_data_read(YDB_TablePage* src, void* dst, YDB_PageSize n);
  *
  * @todo Possible error codes.
  */
-YDB_Error ydb_page_data_write(YDB_TablePage* dst, void* src, YDB_PageSize n);
+YDB_Error ydb_page_data_write(YDB_TablePage* dst, const void* src, YDB_PageSize n);
 
 /**
  * @brief Get page flags.
