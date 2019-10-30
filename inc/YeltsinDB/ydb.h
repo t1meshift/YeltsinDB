@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <YeltsinDB/types.h>
 #include <YeltsinDB/table_page.h>
@@ -149,3 +153,7 @@ YDB_Error ydb_delete_current_page(YDB_Engine* instance);
  *
  * And in some cases even [table file structure](table_file.md)
  */
+
+#ifdef __cplusplus
+}
+#endif

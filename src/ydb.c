@@ -1,3 +1,7 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -377,3 +381,7 @@ YDB_Error ydb_delete_current_page(YDB_Engine *instance) {
 
   return YDB_ERR_SUCCESS;
 }
+
+#ifdef __cplusplus
+}
+#endif

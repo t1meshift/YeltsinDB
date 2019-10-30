@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <YeltsinDB/types.h>
 
@@ -100,5 +104,6 @@ YDB_PageSize ydb_page_row_count_get(YDB_TablePage* page);
  */
 void ydb_page_row_count_set(YDB_TablePage* page, YDB_PageSize row_count);
 
-
-
+#ifdef __cplusplus
+}
+#endif

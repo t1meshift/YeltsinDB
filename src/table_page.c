@@ -1,3 +1,6 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <YeltsinDB/constants.h>
@@ -112,5 +115,7 @@ void ydb_page_row_count_set(YDB_TablePage *page, YDB_PageSize row_count) {
   page->row_count = row_count;
 }
 
-
+#ifdef __cplusplus
+}
+#endif
 
