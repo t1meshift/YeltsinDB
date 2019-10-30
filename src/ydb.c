@@ -299,6 +299,7 @@ YDB_Error ydb_append_page(YDB_Engine* instance, YDB_TablePage* page) {
   YDB_Flags f = ydb_page_flags_get(page);
   YDB_Offset next = 0;
   char d[YDB_TABLE_PAGE_SIZE - 11]; // TODO move magic numbers somewhere
+  ydb_page_data_seek(page, 0);
   if (ydb_page_data_read(page, d, sizeof(d))) {
     return YDB_ERR_UNKNOWN; // FIXME
   }
@@ -338,6 +339,7 @@ YDB_Error ydb_replace_current_page(YDB_Engine *instance, YDB_TablePage *page) {
 
   // Write data
   char page_data[YDB_TABLE_PAGE_SIZE - 11]; // TODO move magic numbers somewhere
+  ydb_page_data_seek(page, 0);
   if (ydb_page_data_read(page, page_data, sizeof(page_data))) {
     return YDB_ERR_UNKNOWN; // FIXME
   }
