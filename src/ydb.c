@@ -346,9 +346,15 @@ YDB_Error ydb_replace_current_page(YDB_Engine *instance, YDB_TablePage *page) {
 }
 
 YDB_Error ydb_delete_current_page(YDB_Engine *instance) {
-  // TODO check if it's only page in table
   THROW_IF_NULL(instance, YDB_ERR_INSTANCE_NOT_INITIALIZED);
   THROW_IF_NULL(instance->in_use, YDB_ERR_INSTANCE_NOT_IN_USE);
+
+  if (instance->prev_page_offset == 0 && instance->next_page_offset == 0) {
+    fseek(instance->fd, instance->curr_page_offset + 9, SEEK_SET); // Skip page flags + next ptr
+    YDB_PageSize tmp = 0;
+    fwrite(&tmp, sizeof(YDB_PageSize), 1, instance->fd);
+    return YDB_ERR_SUCCESS;
+  }
 
   // Mark page as deleted
   fseek(instance->fd, instance->curr_page_offset, SEEK_SET);
