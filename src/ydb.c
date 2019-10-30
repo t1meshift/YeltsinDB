@@ -212,10 +212,11 @@ YDB_Error ydb_create_table(YDB_Engine *instance, const char *path) {
 
   FILE *f = fopen(path, "wb");
 
+  // TODO test on other byte ordered archs
   char tpl[] = YDB_TABLE_FILE_SIGN
                "\x00\x01"
-               "\x00\x00\x00\x00\x00\x00\x00\x1E"
-               "\x00\x00\x00\x00\x00\x00\x00\x1E"
+               "\x1E\x00\x00\x00\x00\x00\x00\x00"
+               "\x1E\x00\x00\x00\x00\x00\x00\x00"
                "\x00\x00\x00\x00\x00\x00\x00\x00";
   fwrite(tpl, sizeof(tpl)-1, 1, f);
 
