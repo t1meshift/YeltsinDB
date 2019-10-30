@@ -52,7 +52,7 @@ void ydb_terminate_instance(YDB_Engine *instance) {
 // Internal usage only!
 // Its only purpose to read current page data and set next_page offset.
 // You should write prev_page offset on your own.
-inline YDB_Error __ydb_read_page(YDB_Engine *inst) {
+YDB_Error __ydb_read_page(YDB_Engine *inst) {
   THROW_IF_NULL(inst, YDB_ERR_INSTANCE_NOT_INITIALIZED);
 
   fseek(inst->fd, inst->curr_page_offset, SEEK_SET);
@@ -88,7 +88,7 @@ inline YDB_Error __ydb_read_page(YDB_Engine *inst) {
 }
 // Moves file position to allocated block.
 // Also changes last_free_page_offset.
-inline YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
+YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
   YDB_Offset result = 0;
   // If no free pages in the table, then...
   if (inst->last_free_page_offset == 0) {
