@@ -104,6 +104,15 @@ YDB_PageSize ydb_page_row_count_get(YDB_TablePage* page);
  */
 void ydb_page_row_count_set(YDB_TablePage* page, YDB_PageSize row_count);
 
+/**
+ * @brief Clone a page.
+ * @param page A page to clone.
+ * @return A cloned page.
+ *
+ * Notice that you should deallocate it with ydb_page_free().
+ */
+YDB_TablePage* ydb_page_clone(const YDB_TablePage* page);
+
 #ifdef __cplusplus
 }
 #endif

@@ -115,6 +115,12 @@ void ydb_page_row_count_set(YDB_TablePage *page, YDB_PageSize row_count) {
   page->row_count = row_count;
 }
 
+YDB_TablePage *ydb_page_clone(const YDB_TablePage *page) {
+  YDB_TablePage* result = malloc(sizeof(YDB_TablePage));
+  memcpy(result, page, sizeof(YDB_TablePage));
+  return result;
+}
+
 #ifdef __cplusplus
 }
 #endif
