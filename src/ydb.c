@@ -346,6 +346,9 @@ YDB_Error ydb_replace_current_page(YDB_Engine *instance, YDB_TablePage *page) {
   // Flush buffer
   fflush(instance->fd);
 
+  ydb_page_free(instance->curr_page);
+  instance->curr_page = page;
+
   return YDB_ERR_SUCCESS;
 }
 
