@@ -67,6 +67,10 @@
  */
 #define YDB_ERR_NO_MORE_PAGES               (-12)
 /**
+ * @brief The addresses of pages are the same.
+ */
+#define YDB_ERR_SAME_PAGE_ADDRESS           (-13)
+/**
  * @brief An unknown error has occurred.
  */
 #define YDB_ERR_UNKNOWN                     (-32768)

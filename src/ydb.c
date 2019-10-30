@@ -318,6 +318,10 @@ YDB_Error ydb_replace_current_page(YDB_Engine *instance, YDB_TablePage *page) {
   THROW_IF_NULL(instance->in_use, YDB_ERR_INSTANCE_NOT_IN_USE);
   THROW_IF_NULL(page, YDB_ERR_PAGE_NOT_INITIALIZED);
 
+  if (instance->curr_page == page) {
+    return YDB_ERR_SAME_PAGE_ADDRESS;
+  }
+
   // Seek to current page in file
   fseek(instance->fd, instance->curr_page_offset, SEEK_SET);
 
