@@ -52,7 +52,7 @@ void ydb_terminate_instance(YDB_Engine *instance) {
 // Internal usage only!
 // Its only purpose to read current page data and set next_page offset.
 // You should write prev_page offset on your own.
-YDB_Error __ydb_read_page(YDB_Engine *inst) {
+static YDB_Error __ydb_read_page(YDB_Engine *inst) {
   THROW_IF_NULL(inst, YDB_ERR_INSTANCE_NOT_INITIALIZED);
 
   fseek(inst->fd, inst->curr_page_offset, SEEK_SET);
@@ -88,7 +88,7 @@ YDB_Error __ydb_read_page(YDB_Engine *inst) {
 }
 // Moves file position to allocated block.
 // Also changes last_free_page_offset.
-YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
+static YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
   YDB_Offset result = 0;
   // If no free pages in the table, then...
   if (inst->last_free_page_offset == 0) {
@@ -149,7 +149,7 @@ YDB_Error ydb_load_table(YDB_Engine *instance, const char *path) {
 
   char signature[4];
   fread(signature, 1, 4, instance->fd);
-  int signature_match = memcmp(signature, YDB_TABLE_FILE_SIGN, 4) == 0;
+  int signature_match = memcmp(signature, YDB_TABLE_FILE_SIGN, 3) == 0;
   if (!signature_match) {
     return YDB_ERR_TABLE_DATA_CORRUPTED;
   }
@@ -159,6 +159,19 @@ YDB_Error ydb_load_table(YDB_Engine *instance, const char *path) {
 
   if (instance->ver_major != 0) { // TODO proper version check
     return YDB_ERR_TABLE_DATA_VERSION_MISMATCH;
+  }
+
+  switch (signature[3]) {
+    case '!':
+      break;
+    case '?':
+      if (instance->ver_minor < 2) {
+        return YDB_ERR_TABLE_DATA_CORRUPTED;
+      }
+      // TODO mark table as possibly corrupted and start rollback from journal
+      break;
+    default:
+      return YDB_ERR_TABLE_DATA_CORRUPTED;
   }
 
   fread(&(instance->first_page_offset), sizeof(YDB_Offset), 1, instance->fd);
@@ -214,7 +227,7 @@ YDB_Error ydb_create_table(YDB_Engine *instance, const char *path) {
 
   // TODO test on other byte ordered archs
   char tpl[] = YDB_TABLE_FILE_SIGN
-               "\x00\x01"
+               "\x00\x02"
                "\x1E\x00\x00\x00\x00\x00\x00\x00"
                "\x1E\x00\x00\x00\x00\x00\x00\x00"
                "\x00\x00\x00\x00\x00\x00\x00\x00";

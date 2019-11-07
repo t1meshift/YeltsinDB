@@ -136,14 +136,6 @@ YDB_Error ydb_delete_current_page(YDB_Engine* instance);
 
 // TODO: rebuild page offsets, etc.
 
-// Internal usage only!
-// Its only purpose to read current page data and set next_page offset.
-// You should write prev_page offset on your own.
-YDB_Error __ydb_read_page(YDB_Engine *inst);
-// Moves file position to allocated block.
-// Also changes last_free_page_offset.
-YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst);
-
 /**
  * @mainpage YeltsinDB docs index page
  *
