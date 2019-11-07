@@ -2,12 +2,15 @@
 
 ## Table file version changelog
 
+### v0.2
++ Added table "write incomplete" flag.
+
 ### v0.1
 Initial version.
 
 ## Overall specification
 
-1. `TBL!` file signature (4 bytes)
+1. `TBL!` file signature (4 bytes) **could be `TBL?` if an operation on a table is incompleted**
 2. Table file version (2 bytes)
 3. The offset to the first page in a table. (8 bytes)
 4. The offset to the last page in a table. (8 bytes)
@@ -56,3 +59,8 @@ If there is a free page, there actions are being done:
 3. Put last available free page as the next page ((6.1) = 5)
 4. Set current page offset as the offset to the last available free page ((5) = current_page_offset)
 
+## File signature
+
+*Since v0.2* a file signature could be `TBL?`, which signals for incomplete table write operation.
+If that signature is detected, the state of a table should be reverted to that it was before failed
+transaction.
