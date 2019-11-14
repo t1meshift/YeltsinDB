@@ -324,6 +324,8 @@ YDB_Error ydb_append_page(YDB_Engine* instance, YDB_TablePage* page) {
 
   fflush(instance->fd);
 
+  __ydb_read_page(instance);
+
   return YDB_ERR_SUCCESS;
 }
 
