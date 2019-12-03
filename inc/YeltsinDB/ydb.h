@@ -151,7 +151,7 @@ YDB_Error ydb_delete_current_page(YDB_Engine* instance);
  *
  * - types.h
  *
- * And in some cases even [table file structure](table_file.md)
+ * And in some cases even [table file structure](table_file_v0.md)
  */
 
 #ifdef __cplusplus

@@ -1,4 +1,4 @@
-# Table file structure
+# Table file structure (v0)
 
 ## Table file version changelog
 
@@ -8,7 +8,7 @@
 ### v0.1
 Initial version.
 
-## Overall specification
+## v0.x specification
 
 1. `TBL!` file signature (4 bytes) **could be `TBL?` if an operation on a table is incompleted**
 2. Table file version (2 bytes)
@@ -27,7 +27,7 @@ Initial version.
 
 In the further time, it's planned to rewrite the file structure, so it's useful to have a version marker.
 
-|      7-4      |      3-0      |
+|     15-8      |      7-0      |
 |---------------|---------------|
 | Major version | Minor version |
 
@@ -53,10 +53,10 @@ See "Page flags specification" above.
 A page can be called *free* iff all its rows are deleted. 
 If there is a free page, there actions are being done:
 
-1. Set `DEL` page flag ((6.3) |= FLAG_DEL)
-2. If a page is **not** the last one, replace next page offset in the previous page with a value in current page 
-((previous 6.1) = (6.1))
-3. Put last available free page as the next page ((6.1) = 5)
+1. Set `DEL` page flag ((6.1) |= FLAG_DEL)
+2. If a page is **not** the first one, replace next page offset in the previous page with a value in current page 
+((previous 6.2) = (6.2))
+3. Put last available free page as the next page ((6.2) = 5)
 4. Set current page offset as the offset to the last available free page ((5) = current_page_offset)
 
 ## File signature
