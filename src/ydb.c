@@ -33,38 +33,6 @@ struct __YDB_Engine {
   FILE *fd; /**< Current table data file descriptor. */
 };
 
-struct __data_offsets {
-  YDB_Offset signature,
-             ver_major,
-             ver_minor,
-             first_page_offset,
-             last_page_offset,
-             last_free_page_offset,
-             meta_end;
-};
-struct __page_offsets {
-  YDB_Offset flags,
-             next_page_offset,
-             row_count,
-             meta_end;
-};
-
-static const struct __data_offsets v0_offsets = {
-  .signature = 0,
-  .ver_major = 4,
-  .ver_minor = 5,
-  .first_page_offset = 6,
-  .last_page_offset = 14,
-  .last_free_page_offset = 22,
-  .meta_end = 30
-};
-static const struct __page_offsets v0_page_offsets = {
-  .flags = 0,
-  .next_page_offset = 1,
-  .row_count = 9,
-  .meta_end = 11
-};
-
 YDB_Engine *ydb_init_instance() {
   YDB_Engine *new_instance = calloc(1, sizeof(YDB_Engine));
   return new_instance;
@@ -98,12 +66,12 @@ static YDB_Error __ydb_read_page(YDB_Engine *inst) {
   YDB_Flags page_flags = p_data[0];
   YDB_Offset next;
   YDB_PageSize row_count;
-  memcpy(&next, p_data + v0_page_offsets.next_page_offset, sizeof(next));
+  memcpy(&next, p_data + YDB_v0_page_next_offset, sizeof(next));
   REASSIGN_FROM_LE(next);
-  memcpy(&row_count, p_data + v0_page_offsets.row_count, sizeof(row_count));
+  memcpy(&row_count, p_data + YDB_v0_page_row_count_offset, sizeof(row_count));
   REASSIGN_FROM_LE(row_count);
 
-  const YDB_PageSize meta_size = v0_page_offsets.meta_end;
+  const YDB_PageSize meta_size = YDB_v0_page_data_offset;
   const YDB_PageSize data_size = YDB_TABLE_PAGE_SIZE - meta_size;
 
   YDB_TablePage *p = ydb_page_alloc(data_size);
@@ -138,12 +106,12 @@ static YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
     // TODO throw error on fail
 
     // Write next page offset in the previous page
-    fseek(inst->fd, inst->last_page_offset + v0_page_offsets.next_page_offset, SEEK_SET); // Skip page flag
+    fseek(inst->fd, inst->last_page_offset + YDB_v0_page_next_offset, SEEK_SET); // Skip page flag
     fwrite(&allocated_page_offset_le, sizeof(YDB_Offset), 1, inst->fd);
 
     // Write last page offset
     inst->last_page_offset = result;
-    fseek(inst->fd, v0_offsets.last_page_offset, SEEK_SET);
+    fseek(inst->fd, YDB_v0_last_page_offset, SEEK_SET);
     fwrite(&allocated_page_offset_le, sizeof(YDB_Offset), 1, inst->fd);
     fflush(inst->fd);
   } else {
@@ -151,10 +119,10 @@ static YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
     result = inst->last_free_page_offset;
 
     // Read last free page offset after allocation
-    fseek(inst->fd, result + v0_page_offsets.next_page_offset, SEEK_SET); // Skip flag
+    fseek(inst->fd, result + YDB_v0_page_next_offset, SEEK_SET); // Skip flag
     fread(&inst->last_free_page_offset, sizeof(YDB_Offset), 1, inst->fd);
     REASSIGN_FROM_LE(inst->last_free_page_offset);
-    fseek(inst->fd, -(long)(sizeof(YDB_Offset) + 1), SEEK_CUR);
+    fseek(inst->fd, -(long)(sizeof(YDB_Offset) + 1), SEEK_CUR); //FIXME magic
 
     // Rewrite page header
     char page_header[] = "\x00" // No flags
@@ -163,7 +131,7 @@ static YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
     fwrite(page_header, sizeof(page_header)-1, 1, inst->fd);
 
     // Write last free page offset after allocation in file
-    fseek(inst->fd, v0_offsets.last_free_page_offset, SEEK_SET);
+    fseek(inst->fd, YDB_v0_last_free_page_offset, SEEK_SET);
     YDB_Offset lfp_offset_le = TO_LE(inst->last_free_page_offset);
     fwrite(&lfp_offset_le, sizeof(YDB_Offset), 1, inst->fd);
   }
@@ -184,6 +152,7 @@ YDB_Error ydb_load_table(YDB_Engine *instance, const char *path) {
   instance->fd = fopen(path, "rb+");
   THROW_IF_NULL(instance->fd, YDB_ERR_UNKNOWN); // TODO file open error
 
+  // FIXME magic
   char signature[4];
   fread(signature, 1, 4, instance->fd);
   int signature_match = memcmp(signature, YDB_TABLE_FILE_SIGN, 3) == 0;
@@ -350,7 +319,7 @@ YDB_Error ydb_append_page(YDB_Engine* instance, YDB_TablePage* page) {
   YDB_PageSize rc = ydb_page_row_count_get(page);
   YDB_Flags f = ydb_page_flags_get(page);
   YDB_Offset next = 0;
-  char d[YDB_TABLE_PAGE_SIZE - v0_page_offsets.meta_end];
+  char d[YDB_TABLE_PAGE_SIZE - YDB_v0_page_data_offset];
   ydb_page_data_seek(page, 0);
   if (ydb_page_data_read(page, d, sizeof(d))) {
     return YDB_ERR_UNKNOWN; // FIXME
@@ -395,7 +364,7 @@ YDB_Error ydb_replace_current_page(YDB_Engine *instance, YDB_TablePage *page) {
   fwrite(&row_cnt_le, sizeof(row_cnt), 1, instance->fd);
 
   // Write data
-  char page_data[YDB_TABLE_PAGE_SIZE - v0_page_offsets.meta_end];
+  char page_data[YDB_TABLE_PAGE_SIZE - YDB_v0_page_data_offset];
   ydb_page_data_seek(page, 0);
   if (ydb_page_data_read(page, page_data, sizeof(page_data))) {
     return YDB_ERR_UNKNOWN; // FIXME
