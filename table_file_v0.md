@@ -1,5 +1,7 @@
 # Table file structure (v0)
 
+Notice that this version is not supported now. Use v1 documentation instead.
+
 ## Table file version changelog
 
 ### v0.2

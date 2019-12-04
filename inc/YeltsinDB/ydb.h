@@ -68,26 +68,13 @@ YDB_Error ydb_create_table(YDB_Engine* instance, const char *path);
 YDB_Error ydb_unload_table(YDB_Engine* instance);
 
 /**
- * @brief Seek to `index`th page.
+ * @brief Switch to previous page.
  * @param instance A YeltsinDB instance.
- * @param index Page index.
  * @return Operation status.
  *
- * If an error was returned, the state of instance remains the same as it was before execution.
  * @todo Possible error codes.
  */
-YDB_Error ydb_seek_page(YDB_Engine* instance, int64_t index);
-
-/**
- * @brief Get current page index.
- * @param instance A YeltsinDB instance.
- * @return Current page index.
- * @sa error_code.h
- *
- * Could return error codes (negative values).
- * @todo Possible error codes.
- */
-int64_t ydb_tell_page(YDB_Engine* instance);
+YDB_Error ydb_prev_page(YDB_Engine* instance);
 
 /**
  * @brief Switch to next page.
@@ -134,6 +121,15 @@ YDB_TablePage* ydb_get_current_page(YDB_Engine* instance);
  */
 YDB_Error ydb_delete_current_page(YDB_Engine* instance);
 
+/**
+ * @brief Seek to the last page.
+ * @param instance A YeltsinDB instance
+ * @return Operation status.
+ *
+ * @warning Could break an instance if ydb_
+ */
+YDB_Error ydb_seek_to_end(YDB_Engine* instance);
+
 // TODO: rebuild page offsets, etc.
 
 /**
@@ -151,7 +147,7 @@ YDB_Error ydb_delete_current_page(YDB_Engine* instance);
  *
  * - types.h
  *
- * And in some cases even [table file structure](table_file_v0.md)
+ * And in some cases even [table file structure](table_file_v1.md)
  */
 
 #ifdef __cplusplus
