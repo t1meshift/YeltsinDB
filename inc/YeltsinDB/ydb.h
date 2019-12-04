@@ -122,11 +122,16 @@ YDB_TablePage* ydb_get_current_page(YDB_Engine* instance);
 YDB_Error ydb_delete_current_page(YDB_Engine* instance);
 
 /**
- * @brief Seek to the last page.
- * @param instance A YeltsinDB instance
+ * @brief Seek to the first page.
+ * @param instance A YeltsinDB instance.
  * @return Operation status.
- *
- * @warning Could break an instance if ydb_
+ */
+YDB_Error ydb_seek_to_begin(YDB_Engine* instance);
+
+/**
+ * @brief Seek to the last page.
+ * @param instance A YeltsinDB instance.
+ * @return Operation status.
  */
 YDB_Error ydb_seek_to_end(YDB_Engine* instance);
 

@@ -409,6 +409,17 @@ YDB_Error ydb_delete_current_page(YDB_Engine *instance) {
   return __ydb_read_page(instance);
 }
 
+YDB_Error ydb_seek_to_begin(YDB_Engine *instance) {
+  THROW_IF_NULL(instance, YDB_ERR_INSTANCE_NOT_INITIALIZED);
+  THROW_IF_NULL(instance->in_use, YDB_ERR_INSTANCE_NOT_IN_USE);
+
+  if (instance->prev_page_offset == 0)
+    return YDB_ERR_SUCCESS;
+
+  instance->curr_page_offset = instance->prev_page_offset;
+  return __ydb_read_page(instance);
+}
+
 YDB_Error ydb_seek_to_end(YDB_Engine *instance) {
   THROW_IF_NULL(instance, YDB_ERR_INSTANCE_NOT_INITIALIZED);
   THROW_IF_NULL(instance->in_use, YDB_ERR_INSTANCE_NOT_IN_USE);
