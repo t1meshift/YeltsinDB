@@ -1,0 +1,4 @@
+# Journal file structure
+
+## Specification
+
