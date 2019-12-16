@@ -61,15 +61,15 @@
 /**
  * @brief An attempt to read/write 0 bytes has occurred.
  */
-#define YDB_ERR_ZERO_SIZE_RW                (-11)
+#define YDB_ERR_ZERO_SIZE_RW                (-12)
 /**
  * @brief No more pages left in the file.
  */
-#define YDB_ERR_NO_MORE_PAGES               (-12)
+#define YDB_ERR_NO_MORE_PAGES               (-13)
 /**
  * @brief The addresses of pages are the same.
  */
-#define YDB_ERR_SAME_PAGE_ADDRESS           (-13)
+#define YDB_ERR_SAME_PAGE_ADDRESS           (-14)
 /**
  * @brief An unknown error has occurred.
  */
