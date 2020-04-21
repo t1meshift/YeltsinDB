@@ -12,4 +12,7 @@ add_library(YeltsinDB STATIC
         inc/YeltsinDB/constants.h
         inc/YeltsinDB/types.h
         inc/YeltsinDB/macro.h
-        )
+        inc/YeltsinDB/journal.h src/journal.c
+        inc/YeltsinDB/journal/transaction.h src/journal/transaction.c
+        inc/YeltsinDB/journal/transaction_op.h
+        inc/YDB_ext/vec.h inc/YDB_ext/vec.c)

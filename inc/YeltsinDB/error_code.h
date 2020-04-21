@@ -71,6 +71,54 @@
  */
 #define YDB_ERR_SAME_PAGE_ADDRESS           (-14)
 /**
+ * @brief The transaction is not initialized.
+ */
+#define YDB_ERR_TRANSACTION_NOT_INITIALIZED (-15)
+/**
+ * @brief Transaction operation push failed.
+ */
+#define YDB_ERR_TRANSACTION_OP_PUSH_FAILED  (-16)
+/**
+ * @brief Index of transaction operation is out of range.
+ */
+#define YDB_ERR_TRANSACTION_OP_OUT_OF_RANGE (-17)
+/**
+ * @brief The journal is not initialized.
+ */
+#define YDB_ERR_JOURNAL_NOT_INITIALIZED     (-18)
+/**
+ * @brief The journal is in use.
+ */
+#define YDB_ERR_JOURNAL_IN_USE              (-19)
+/**
+ * @brief The journal is not in use.
+ */
+#define YDB_ERR_JOURNAL_NOT_IN_USE          (-20)
+/**
+ * @brief The journal file does not exist.
+ */
+#define YDB_ERR_JOURNAL_NOT_EXIST           (-21)
+/**
+ * @brief The journal file does already exist.
+ */
+#define YDB_ERR_JOURNAL_EXIST               (-22)
+/**
+ * @brief The journal file is corrupted.
+ */
+#define YDB_ERR_JOURNAL_FILE_CORRUPTED      (-23)
+/**
+ * @brief The journal is not consistent.
+ */
+#define YDB_ERR_JOURNAL_NOT_CONSISTENT      (-24)
+/**
+ * @brief No more transactions left in the journal.
+ */
+#define YDB_ERR_NO_MORE_TRANSACTIONS        (-25)
+/**
+ * @brief The journal is empty.
+ */
+#define YDB_ERR_JOURNAL_EMPTY               (-26)
+/**
  * @brief An unknown error has occurred.
  */
 #define YDB_ERR_UNKNOWN                     (-32768)

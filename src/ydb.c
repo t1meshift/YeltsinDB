@@ -11,6 +11,11 @@ extern "C" {
 #include <YeltsinDB/constants.h>
 #include <YeltsinDB/macro.h>
 #include <YeltsinDB/table_page.h>
+#ifndef NO_JOURNAL
+#include <YeltsinDB/journal.h>
+#include <YeltsinDB/journal/transaction.h>
+#include <YeltsinDB/journal/transaction_op.h>
+#endif
 #include <YeltsinDB/ydb.h>
 
 struct __YDB_Engine {
@@ -29,15 +34,26 @@ struct __YDB_Engine {
   uint8_t in_use; /**< "In use" flag. */
   char *filename; /**< Current table data file name. */
   FILE *fd; /**< Current table data file descriptor. */
+
+#ifndef NO_JOURNAL
+  YDB_Journal* jrnl;
+#endif
 };
 
 YDB_Engine *ydb_init_instance() {
   YDB_Engine *new_instance = calloc(1, sizeof(YDB_Engine));
+#ifndef NO_JOURNAL
+  new_instance->jrnl = ydb_journal_init();
+#endif
   return new_instance;
 }
 
 void ydb_terminate_instance(YDB_Engine *instance) {
   ydb_unload_table(instance);
+
+#ifndef NO_JOURNAL
+  ydb_journal_destroy(instance->jrnl);
+#endif
 
   // And after all that, the instance could be freed
   free(instance);
@@ -91,6 +107,14 @@ static YDB_Error __ydb_read_page(YDB_Engine *inst) {
 // Moves file position to allocated block.
 // Also changes last_free_page_offset.
 static YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
+  // TODO journal
+#ifndef NO_JOURNAL
+  YDB_Transaction* t = ydb_transaction_create();
+  YDB_TransactionOp* op_alloc = malloc(sizeof(YDB_TransactionOp));
+  op_alloc->opcode = YDB_jrnl_op_page_alloc;
+  op_alloc->size = 24;
+  op_alloc->data = malloc(op_alloc->size);
+#endif
   // TODO change signature of the function. It should return an error code, I think.
   YDB_Offset result = 0;
   // If no free pages in the table, then...
@@ -118,7 +142,7 @@ static YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
     inst->last_page_offset = result;
     fseek(inst->fd, YDB_v1_last_page_offset, SEEK_SET);
     fwrite(&allocated_page_offset_le, sizeof(YDB_Offset), 1, inst->fd);
-    fflush(inst->fd);
+    fsync(fileno(inst->fd));
   } else {
     // Return last free page offset
     result = inst->last_free_page_offset;
@@ -143,7 +167,7 @@ static YDB_Offset __ydb_allocate_page_and_seek(YDB_Engine *inst) {
     YDB_Offset lfp_offset_le = TO_LE(inst->last_free_page_offset);
     fwrite(&lfp_offset_le, sizeof(YDB_Offset), 1, inst->fd);
   }
-  fflush(inst->fd);
+  fsync(fileno(inst->fd));
   fseek(inst->fd, result, SEEK_SET);
   return result;
 }
@@ -303,7 +327,7 @@ YDB_Error ydb_append_page(YDB_Engine* instance, YDB_TablePage* page) {
   fwrite(&rc_le, sizeof(rc), 1, instance->fd);
   fwrite(d, sizeof(d), 1, instance->fd);
 
-  fflush(instance->fd);
+  fsync(fileno(instance->fd));
 
   __ydb_read_page(instance);
 
@@ -343,7 +367,7 @@ YDB_Error ydb_replace_current_page(YDB_Engine *instance, YDB_TablePage *page) {
   fwrite(page_data, sizeof(page_data), 1, instance->fd);
 
   // Flush buffer
-  fflush(instance->fd);
+  fsync(fileno(instance->fd));
 
   ydb_page_free(instance->curr_page);
   instance->curr_page = page;
@@ -398,7 +422,7 @@ YDB_Error ydb_delete_current_page(YDB_Engine *instance) {
   fwrite(&cp_le, sizeof(YDB_Offset), 1, instance->fd);
 
   // Flush buffer
-  fflush(instance->fd);
+  fsync(fileno(instance->fd));
 
   // Seek to the next page if it's not the last, else seek to the previous one
   if (instance->next_page_offset != 0) {
@@ -429,6 +453,10 @@ YDB_Error ydb_seek_to_end(YDB_Engine *instance) {
 
   instance->curr_page_offset = instance->next_page_offset;
   return __ydb_read_page(instance);
+}
+
+YDB_Error ydb_commit_changes(YDB_Engine *instance) {
+  return 0;
 }
 
 #ifdef __cplusplus

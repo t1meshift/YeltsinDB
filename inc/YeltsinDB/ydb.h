@@ -135,6 +135,8 @@ YDB_Error ydb_seek_to_begin(YDB_Engine* instance);
  */
 YDB_Error ydb_seek_to_end(YDB_Engine* instance);
 
+YDB_Error ydb_commit_changes(YDB_Engine* instance);
+
 // TODO: rebuild page offsets, etc.
 
 /**

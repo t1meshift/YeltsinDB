@@ -3,11 +3,11 @@
 ## Specification
 
 1. `JRNL` file signature (4 bytes)
-2. The offset to the first transaction (8 bytes)
-3. The offset to the last transaction (8 bytes)
+2. The offset to the first transaction (8 bytes) **(could be 0 if no transactions)**
+3. The offset to the last transaction (8 bytes) **(could be 0 if no transactions)**
 4. Transactions
-    1. Previous transaction offset (8 bytes)
-    2. Next transaction offset (8 bytes)
+    1. Previous transaction offset (8 bytes) **(could be 0 if the first one)**
+    2. Next transaction offset (8 bytes) **(could be 0 if the last one)**
     3. Creation date in Unix timestamp format (8 bytes)
     4. Transaction flags (1 byte)
     5. Operations list
@@ -20,11 +20,15 @@
 ### Flags
 
 **TODO**. Now there is the only option -- `JRNL_COMPLETE` on bit 0.
+It means that the transaction was completely written to the storage.
 
 ### Consistency
 
 If the last transaction was not written completely, journal rollback is started.
 That means that it will be cleaned since it has not even been written to storage.
+
+If the incomplete transaction is the only one in journal, the journal file is truncated 
+to 20 bytes and first and last transaction offsets are being nulled.
 
 If the last transaction is complete in journal but not in storage (flag `JRNL_COMPLETE` is 
 not set), redo is being done. That means the transaction starts again since the journal is 
